@@ -1,5 +1,3 @@
-import 'package:MedBuzz/core/models/fitness_reminder.dart';
-import 'package:MedBuzz/core/models/fitness_reminder_model/fitness_reminder.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -31,12 +29,30 @@ class FitnessNotificationManager {
   }
 
   void showFitnessNotificationDaily(
-      {int id, String title, String body, int hour, int minute}) async {
-    var time = new Time(hour, minute, 0);
+      {int id, String title, String body, DateTime dateTime}) async {
+    var time = new Time(dateTime.hour, dateTime.minute, 0);
     await flutterLocalNotificationsPlugin.showDailyAtTime(
         id, title, body, time, getPlatformChannelSpecfics(id));
     print(
-        'Notification Succesfully Scheduled at ${time.toString()} with id of $id');
+        'Notification Succesfully Scheduled at ${dateTime.toString()} with id of $id');
+  }
+
+  Day nf = Day(1);
+
+  void showFitnessNotificationWeekly({
+    int id,
+    String title,
+    String body,
+//    int dy,
+    Day dy,
+    DateTime dateTime,
+  }) async {
+    var time = Time(dateTime.hour, dateTime.minute, 0);
+    // the value passed as an argument in Day is an example for monday
+    await flutterLocalNotificationsPlugin.showWeeklyAtDayAndTime(
+        id, title, body, dy, time, getPlatformChannelSpecfics(id));
+    print(
+        'Notification Succesfully scheduled weekly on ${dy.toString()}s at ${dateTime.toString()} with id of $id');
   }
 
   void showFitnessNotificationOnce(

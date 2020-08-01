@@ -1,3 +1,4 @@
+import 'package:MedBuzz/core/auth/auth_service.dart';
 import 'package:MedBuzz/core/constants/route_names.dart';
 import 'package:MedBuzz/core/database/user_db.dart';
 import 'package:MedBuzz/core/models/user_model/user_model.dart';
@@ -19,6 +20,7 @@ class MySignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //Set features intro in Medications to false
     return SafeArea(
       child: Scaffold(
           backgroundColor: Theme.of(context).backgroundColor,
@@ -33,6 +35,7 @@ class MySignUp extends StatelessWidget {
     var userDb = Provider.of<UserCrud>(context, listen: true);
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
+    Auth authenticateBiometric = Auth();
     return Container(
       height: height,
       width: width,
@@ -79,12 +82,13 @@ class MySignUp extends StatelessWidget {
             children: <Widget>[
               InkWell(
                 onTap: () async {
-                  if (nameController.text.isNotEmpty) {
-                    print('${nameController.text}');
-                    var newuser = User(
+                  if (await authenticateBiometric.isBiometricAvailable() ==
+                      true) {
+                    authenticateBiometric.isBiometricAvailable();
+                    var newUser = User(
                         id: DateTime.now().toString(),
                         name: nameController.text);
-                    await userDb.adduser(newuser).then((value) async {
+                    await userDb.adduser(newUser).then((value) async {
                       await box.put('status', 'true');
                       FeatureDiscovery.discoverFeatures(
                         context,
@@ -98,14 +102,45 @@ class MySignUp extends StatelessWidget {
                           // feature5
                         },
                       );
+                      FeatureDiscovery.discoverFeatures(context, const <String>{
+                        'feature_1',
+                        'feature_2',
+                        'feature_3'
+                      });
+
+                      authenticateBiometric.availableBioTypes();
+                      authenticateBiometric.authUser(context);
+                    });
+                  } else if (nameController.text.isNotEmpty) {
+                    print('${nameController.text}');
+                    var newUser = User(
+                        id: DateTime.now().toString(),
+                        name: nameController.text);
+                    await userDb.adduser(newUser).then((value) async {
+                      await box.put('status', 'true');
+                      FeatureDiscovery.discoverFeatures(
+                        context,
+                        const <String>{
+                          'feature7',
+                          'feature1',
+                          // feature2,
+                          // feature3,
+                          // feature4,
+                          // feature6,
+                          // feature5
+                        },
+                      );
+                      FeatureDiscovery.discoverFeatures(context, const <String>{
+                        'feature_1',
+                        'feature_2',
+                        'feature_3'
+                      });
+
+//
+
                       Navigator.pushReplacementNamed(
                           context, RouteNames.homePage);
                     });
-                    //delaying with a future might not be the best, but waiting to receive the value from the Future is better
-                    // Future.delayed(
-                    //     Duration(seconds: 2),
-                    //     () => Navigator.pushReplacementNamed(
-                    //         context, RouteNames.homePage));
                   } else {
                     showSnackBar(context);
                   }
@@ -125,7 +160,7 @@ class MySignUp extends StatelessWidget {
                     style: TextStyle(
                       color: Theme.of(context).primaryColorLight,
                       fontWeight: FontWeight.bold,
-                      fontSize: Config.textSize(context, 3.85),
+                      fontSize: Config.textSize(context, 5),
                     ),
                   ),
                 ),

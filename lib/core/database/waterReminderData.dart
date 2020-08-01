@@ -39,6 +39,16 @@ class WaterReminderData extends ChangeNotifier {
   //     .map((e) => e.ml)
   //     .reduce((value, element) => value + element);
 
+  void deleteWaterReminders() async {
+    try {
+      var box = await Hive.openBox<WaterReminder>(_boxName);
+      box.deleteFromDisk();
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<void> addWaterReminder(WaterReminder waterReminder) async {
     var box = await Hive.openBox<WaterReminder>(_boxName);
 

@@ -2,7 +2,6 @@ import 'package:MedBuzz/core/constants/route_names.dart';
 import 'package:MedBuzz/core/database/water_taken_data.dart';
 import 'package:MedBuzz/core/models/water_reminder_model/water_reminder.dart';
 import 'package:MedBuzz/ui/views/water_reminders/schedule_water_reminder_screen.dart';
-import 'package:MedBuzz/ui/widget/delete_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:MedBuzz/ui/size_config/config.dart';
 import 'package:MedBuzz/core/database/waterReminderData.dart';
@@ -44,7 +43,7 @@ class _SingleWaterState extends State<SingleWater> {
         elevation: 0,
         backgroundColor: Theme.of(context).backgroundColor,
       ),
-      body: ListView(children: [
+      body: ListView(physics: BouncingScrollPhysics(), children: [
         Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -322,12 +321,10 @@ class _SingleWaterState extends State<SingleWater> {
                                 .difference(widget.water.startTime)
                                 .inMinutes;
 
-                            double numb = diff / widget.water.interval;
-                            for (var i = 1; i < numb + 1; i++) {
+                            int numb = (diff / widget.water.interval).ceil();
+                            for (var i = 0; i < numb; i++) {
                               var timeValue = widget.water.startTime.add(
-                                Duration(
-                                    minutes:
-                                        i == 1 ? 0 : widget.water.interval * i),
+                                Duration(minutes: widget.water.interval * i),
                               );
                               waterNotificationManager.removeReminder(
                                   widget.water.startTime.day +

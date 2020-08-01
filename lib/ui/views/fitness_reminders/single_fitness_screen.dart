@@ -1,5 +1,6 @@
 import 'package:MedBuzz/core/constants/route_names.dart';
 import 'package:MedBuzz/core/notifications/fitness_notification_manager.dart';
+import 'package:MedBuzz/ui/views/fitness_reminders/add_fitness_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:MedBuzz/ui/size_config/config.dart';
 import 'package:provider/provider.dart';
@@ -7,23 +8,19 @@ import '../../../core/constants/route_names.dart';
 import '../../../core/database/fitness_reminder.dart';
 import '../../../core/models/fitness_reminder_model/fitness_reminder.dart';
 
-class SingleFitnessScreen extends StatefulWidget {
-  @override
-  _SingleFitnessScreenState createState() => _SingleFitnessScreenState();
-}
+class SingleFitnessScreen extends StatelessWidget {
+  final FitnessReminder rem;
 
-class _SingleFitnessScreenState extends State<SingleFitnessScreen> {
-  Color color;
+  const SingleFitnessScreen({Key key, this.rem}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     var model = Provider.of<FitnessReminderCRUD>(context);
-    int no_of_days = model.endDate.day - model.startDate.day;
-    int current_day = model.endDate.day - DateTime.now().day - 1;
-    String days_left = no_of_days == 0
+    int noOfDays = rem.endDate.day - rem.startDate.day;
+    int currentDay = rem.endDate.day - DateTime.now().day - 1;
+    String daysLeft = noOfDays == 0
         ? 'Today is the last day!'
-        : '$current_day day(s) left out of $no_of_days days';
-    FitnessNotificationManager fitnessNotificationManager =
-        FitnessNotificationManager();
+        : '$currentDay day(s) left out of $noOfDays days';
+    // FitnessReminder rem = FitnessReminder();
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -45,16 +42,33 @@ class _SingleFitnessScreenState extends State<SingleFitnessScreen> {
               child: Align(
                 alignment: Alignment.topRight,
                 child: FlatButton.icon(
-                    onPressed: () async {
+                    onPressed: () {
+                      // String time = DateTime.now().toString();
+                      // String hour = time.substring(0, 2);
+                      // String minutes = time.substring(3, 5);
+                      // DateTime now = DateTime.now();
+                      // String id =
+                      //     '${now.year}${now.month}${now.day}$hour$minutes';
+                      // String notifId =
+                      //     id.length < 11 ? id : id.substring(0, 10);
+
+                      print(model.id);
+                      print(model.selectedIndex);
+
+                      // model.deleteReminder(widget.rem.id.toString());
+                      // print("deleting");
+
                       showDialog(
                           context: context,
-                          child: DeleteBox(
-                            deletion_key: model.id,
-                            newReminder: model.reminder,
+                          child: DeleteDialog(
+                            id: model.id,
+                            index: model.selectedIndex,
+                            rem: rem,
                           )
-                          //show Confirmation dialog
+                          //     //show Confirmation dialog
                           );
                       //Do not write any code here
+                      // Navigator.pop(context);
                     },
                     icon: Icon(
                       Icons.delete,
@@ -154,14 +168,14 @@ class _SingleFitnessScreenState extends State<SingleFitnessScreen> {
                               fontSize: Config.textSize(context, 4),
                             ),
                           ),
-                          Text(
-                            model.activityTime.toString(),
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.normal,
-                              fontSize: Config.textSize(context, 3.6),
-                            ),
-                          ),
+                          // Text(
+                          //   model.activityTime.toString(),
+                          //   style: TextStyle(
+                          //     color: Theme.of(context).primaryColor,
+                          //     fontWeight: FontWeight.normal,
+                          //     fontSize: Config.textSize(context, 3.6),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -178,7 +192,7 @@ class _SingleFitnessScreenState extends State<SingleFitnessScreen> {
                       padding:
                           EdgeInsets.only(top: Config.yMargin(context, 1.0)),
                       child: Text(
-                        days_left,
+                        daysLeft,
                         style: TextStyle(
                           color: Theme.of(context).primaryColorDark,
                           fontSize: Config.textSize(context, 4),
@@ -194,8 +208,23 @@ class _SingleFitnessScreenState extends State<SingleFitnessScreen> {
           padding: EdgeInsets.only(bottom: Config.yMargin(context, 2.0)),
           child: InkWell(
             onTap: () {
-              model.isEditing = true;
-              Navigator.pushNamed(context, RouteNames.fitnessDescriptionScreen);
+              //updates the editing screen with default values before navigating to the screen
+              model.updateSelectedIndex(
+                  model.fitnessType.indexOf(rem.fitnesstype));
+              model.updateMinDaily(rem.minsperday);
+              model.updateFreq(rem.fitnessfreq);
+              model.updateActivityTime(TimeOfDay(
+                  hour: rem.activityTime[0], minute: rem.activityTime[1]));
+              model.updateDescription(rem.description);
+              model.updateStartDate(rem.startDate);
+              model.updateEndDate(rem.endDate);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => FitnessEditScreen(
+                            isEdit: true,
+                            fitnessModel: rem,
+                          )));
             },
             child: Container(
               padding: EdgeInsets.all(Config.xMargin(context, 3.55)),
@@ -231,81 +260,19 @@ class _SingleFitnessScreenState extends State<SingleFitnessScreen> {
   }
 }
 
-class DeleteBox extends StatelessWidget {
-  String deletion_key;
-  FitnessReminder newReminder;
-
-  DeleteBox({this.deletion_key, this.newReminder});
-
-  @override
-  Widget build(BuildContext context) {
-    final model = Provider.of<FitnessReminderCRUD>(context);
-
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Config.xMargin(context, 4.0)),
-      ),
-      child: Container(
-        height: Config.yMargin(context, 20),
-        width: Config.xMargin(context, 150.0),
-        //width: Config.xMargin(context, 50),
-        child: Padding(
-          padding: EdgeInsets.all(5.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(left: 23.0, bottom: 20.0),
-                child: Text(
-                  'Are you sure you want to delete this?',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(
-                    height: Config.yMargin(context, 6.0),
-                    width: Config.xMargin(context, 30.0),
-                    child: FlatButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        "Cancel",
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                        ),
-                      ),
-                      color: Theme.of(context).primaryColorLight,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(Config.xMargin(context, 2.0)),
-                        side: BorderSide(
-                            color:
-                                Theme.of(context).primaryColor.withOpacity(.4),
-                            width: 1.5),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class DeleteDialog extends StatelessWidget {
+  final String id;
+  final int index;
+  final FitnessReminder rem;
+
+  const DeleteDialog({Key key, this.id, this.index, this.rem})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
+    // final FitnessReminder some = FitnessReminder();
+    var model = Provider.of<FitnessReminderCRUD>(context);
+    final FitnessNotificationManager fitnessNotificationManager =
+        FitnessNotificationManager();
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(Config.xMargin(context, 4.0)),
@@ -363,10 +330,30 @@ class DeleteDialog extends StatelessWidget {
                     width: Config.xMargin(context, 30.0),
                     child: FlatButton(
                       onPressed: () {
-                        Future.delayed(Duration(seconds: 1), () {
-                          Navigator.pushReplacementNamed(
-                              context, RouteNames.fitnessSchedulesScreen);
-                        });
+                        print("deleted $id $index");
+                        model.deleteReminder(rem.id);
+
+                        var diff = rem.endDate.difference(rem.startDate).inDays;
+                        var selectedInterval = rem.fitnessfreq == 'Daily'
+                            ? 1
+                            : rem.fitnessfreq == 'Every 2 days'
+                                ? 2
+                                : rem.fitnessfreq == 'Every 3 days'
+                                    ? 3
+                                    : rem.fitnessfreq == 'Every 4 days' ? 4 : 1;
+
+                        int numb = (diff / selectedInterval).ceil();
+                        for (var i = 0; i < numb; i++) {
+                          var timeValue = rem.startDate.add(
+                            Duration(days: selectedInterval * i),
+                          );
+                          fitnessNotificationManager.removeReminder(
+                              rem.startDate.day + timeValue.day + 8000);
+                        }
+                        // Future.delayed(Duration(seconds: 1), () {
+                        Navigator.pushReplacementNamed(
+                            context, RouteNames.fitnessSchedulesScreen);
+                        // });
                       },
                       child: Text(
                         "Delete",

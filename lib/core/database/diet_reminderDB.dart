@@ -2,15 +2,13 @@ import 'package:MedBuzz/core/models/diet_reminder/diet_reminder.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
+import '../models/diet_reminder/diet_reminder.dart';
+
 //Crazelu renamed this as DietReminderDB for better disctinction
 class DietReminderDB extends ChangeNotifier {
   // Hive box name
 
   static const String _boxname = "dietReminderBox";
-
-  // Making an emptylist of diets
-
-  List<DietModel> _diet = [];
 
   // List<DietModel> get pastDiets => this._pastDiets;
   // List<DietModel> get upcomingDiets => this._upcomingDiets;
@@ -19,6 +17,16 @@ class DietReminderDB extends ChangeNotifier {
 
   // List<DietModel> _pastDiets = [];
   // List<DietModel> _upcomingDiets = [];
+
+  void deleteDietReminders() async {
+    try {
+      var box = await Hive.openBox<DietModel>(_boxname);
+      box.deleteFromDisk();
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
 
   // get all diets
 
@@ -46,6 +54,12 @@ class DietReminderDB extends ChangeNotifier {
     return _allDiets[index];
   }
 
+  List<DietModel> get dietRemindersBasedOnDateTime {
+    return _allDiets
+        .where((reminder) => DateTime.now().day == reminder.startDate.day)
+        .toList();
+  }
+
   // add a  diet
 
   void addDiet(DietModel diet) async {
@@ -58,6 +72,18 @@ class DietReminderDB extends ChangeNotifier {
     box.close();
     notifyListeners();
   }
+
+  // void addMany(List<DietModel> diets) async {
+  //   var box = await Hive.openBox<DietModel>(_boxname);
+  //   diets.map((e) => null);
+
+  //   await box.putAll(diet.id, diet);
+
+  //   _allDiets = box.values.toList();
+  //   // print('here ${this._diet}');
+  //   box.close();
+  //   notifyListeners();
+  // }
 
   // delete a diet
   void deleteDiet(key) async {
@@ -75,15 +101,25 @@ class DietReminderDB extends ChangeNotifier {
   void editDiet({DietModel diet}) async {
     var box = await Hive.openBox<DietModel>(_boxname);
 
-    box.put(diet.id, diet);
+    await box.put(diet.id, diet);
 
     _allDiets = box.values.toList();
-    box.close();
     // getAlldiets();
+    box.close();
     notifyListeners();
   }
 
   int getdietcount() {
     return _allDiets.length;
+  }
+
+  double getNumberOfDietsWithFoodClass(String className) {
+    var result = _allDiets
+        .where((element) =>
+            element.isDone == true && element.foodClasses.contains(className))
+        .toList()
+        .length;
+    // return 10.0;
+    return result.toDouble();
   }
 }

@@ -1,5 +1,7 @@
+import 'package:MedBuzz/core/database/notification_data.dart';
 import 'package:MedBuzz/core/database/user_db.dart';
 import 'package:MedBuzz/core/database/water_taken_data.dart';
+import 'package:MedBuzz/core/models/notification_model/notification_model.dart';
 import 'package:MedBuzz/core/models/water_reminder_model/water_reminder.dart';
 import 'package:MedBuzz/ui/size_config/config.dart';
 import 'package:MedBuzz/ui/views/water_reminders/schedule_water_reminder_model.dart';
@@ -29,6 +31,7 @@ class ScheduleWaterReminderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var userDb = Provider.of<UserCrud>(context);
+    var notificationDB = Provider.of<NotificationData>(context);
     userDb.getuser();
     var waterReminder =
         Provider.of<ScheduleWaterReminderViewModel>(context, listen: true);
@@ -56,7 +59,14 @@ class ScheduleWaterReminderScreen extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-          leading: BackButton(color: Theme.of(context).primaryColorDark),
+          leading: IconButton(
+              icon: Icon(Icons.keyboard_backspace,
+                  color: Theme.of(context).primaryColorDark),
+
+              //Function to navigate to previous screen or home screen (as the case maybe) goes here
+              onPressed: () {
+                Navigator.pop(context);
+              }),
           title: Text(
             '${!isEdit ? 'Add a' : 'Edit'} water reminder',
             style: TextStyle(color: Theme.of(context).primaryColorDark),
@@ -65,6 +75,7 @@ class ScheduleWaterReminderScreen extends StatelessWidget {
           backgroundColor: Colors.transparent,
         ),
         body: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
           child: Container(
             child: Column(
               //crossAxisAlignment: CrossAxisAlignment.center,
@@ -450,9 +461,10 @@ class ScheduleWaterReminderScreen extends StatelessWidget {
                                     .difference(waterReminder.getDateTime())
                                     .inMinutes;
 
-                                double numb =
-                                    diff / waterReminder.selectedInterval;
-                                for (var i = 1; i < numb + 1; i++) {
+                                int numb =
+                                    (diff / waterReminder.selectedInterval)
+                                        .ceil();
+                                for (var i = 0; i < numb; i++) {
                                   if (waterReminder.selectedDay ==
                                           DateTime.now().day &&
                                       waterReminder.selectedMonth ==
@@ -460,11 +472,9 @@ class ScheduleWaterReminderScreen extends StatelessWidget {
                                     var timeValue =
                                         waterReminder.getDateTime().add(
                                               Duration(
-                                                  minutes: i == 1
-                                                      ? 0
-                                                      : waterReminder
-                                                              .selectedInterval *
-                                                          i),
+                                                  minutes: waterReminder
+                                                          .selectedInterval *
+                                                      i),
                                             );
                                     if (isEdit) {
                                       // waterTakenDB.deleteAll();
@@ -476,15 +486,26 @@ class ScheduleWaterReminderScreen extends StatelessWidget {
                                               60);
                                       // }
                                     }
-                                    waterNotificationManager.showWaterNotificationDaily(
-                                        id: waterReminder.selectedDay +
-                                            timeValue.minute +
-                                            60,
-                                        title:
-                                            'Hi ${userDb.user?.name}, It\' s time to take some water',
-                                        body:
-                                            'Take ${waterReminder.selectedMl} ml of Water ',
-                                        dateTime: timeValue);
+                                    NotificationModel notificationModel =
+                                        NotificationModel(
+                                            id: (waterReminder.selectedDay +
+                                                    timeValue.minute +
+                                                    60)
+                                                .toString(),
+                                            dateTime: timeValue,
+                                            reminderType: 'water-reminder');
+                                    notificationDB
+                                        .addNotification(notificationModel)
+                                        .then((_) => waterNotificationManager
+                                            .showWaterNotificationDaily(
+                                                id: waterReminder.selectedDay +
+                                                    timeValue.minute +
+                                                    60,
+                                                title:
+                                                    'Hi ${userDb.user?.name}, It\' s time to take some water',
+                                                body:
+                                                    'Take ${waterReminder.selectedMl} ml of Water ',
+                                                dateTime: timeValue));
                                   }
                                 }
                                 isEdit

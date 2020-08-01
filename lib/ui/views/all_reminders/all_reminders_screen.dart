@@ -5,6 +5,7 @@ import 'package:MedBuzz/core/database/fitness_reminder.dart';
 import 'package:MedBuzz/core/database/medication_data.dart';
 import 'package:MedBuzz/ui/size_config/config.dart';
 import 'package:MedBuzz/ui/views/all_reminders/all_reminders_view_model.dart';
+import 'package:MedBuzz/ui/views/fitness_reminders/all_fitness_reminders_screen.dart';
 import 'package:MedBuzz/ui/views/medication_reminders/all_medications_reminder_screen.dart';
 import 'package:MedBuzz/ui/widget/appointment_card.dart';
 import 'package:MedBuzz/ui/widget/diet_card.dart';
@@ -140,7 +141,7 @@ class AllRemindersScreen extends StatelessWidget {
                       width: width * 0.2,
                       decoration: BoxDecoration(
                         color: allReminders.getButtonColor(context, index),
-                        borderRadius: BorderRadius.circular(height * 0.02),
+                        borderRadius: BorderRadius.circular(height * 0.04),
                       ),
                       alignment: Alignment.center,
                       margin: EdgeInsets.only(left: Config.xMargin(context, 2)),
@@ -188,82 +189,17 @@ class AllRemindersScreen extends StatelessWidget {
                           allReminders.fitnessRemindersBasedOnDateTime.length ==
                               0,
                       child: Text('No fitness reminders set yet')),
-                  Visibility(
-                    visible:
-                        allReminders.fitnessRemindersBasedOnDateTime.length > 0,
-                    child: Container(
-                        width: width,
-                        height: height * 0.31,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: allReminders
-                                .fitnessRemindersBasedOnDateTime.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                //Navigate to screen with single reminder i.e the on user clicked on
-                                onTap: () {},
-                                child: Container(
-                                  margin: EdgeInsets.only(
-                                      right: Config.xMargin(context, 3)),
-                                  child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: width * 0.7,
-                                          height: height * .22,
-                                          decoration: BoxDecoration(
-                                            image: DecorationImage(
-                                                image: AssetImage(
-                                                    'images/sprint.png'),
-                                                fit: BoxFit.cover),
-                                            borderRadius: BorderRadius.circular(
-                                                Config.xMargin(context, 6)),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                            height: Config.yMargin(context, 2)),
-                                        //Type of fitness exercise goes here
-                                        Text(
-                                            allReminders
-                                                .fitnessRemindersBasedOnDateTime[
-                                                    index]
-                                                .description,
-                                            style: TextStyle(
-                                                fontSize:
-                                                    Config.textSize(context, 4),
-                                                fontWeight: FontWeight.w600,
-                                                color: Theme.of(context)
-                                                    .primaryColor)),
-                                        SizedBox(
-                                            height:
-                                                Config.yMargin(context, 0.6)),
-                                        Text(
-                                            allReminders
-                                                    .fitnessRemindersBasedOnDateTime[
-                                                        index]
-                                                    .minsperday
-                                                    .toString() +
-                                                " minutes " +
-                                                allReminders
-                                                    .fitnessRemindersBasedOnDateTime[
-                                                        index]
-                                                    .fitnessfreq
-                                                    .toString()
-                                                    .toLowerCase(),
-                                            style: TextStyle(
-                                                fontSize: Config.textSize(
-                                                    context, 4.5),
-                                                fontWeight: FontWeight.w400,
-                                                color: Theme.of(context)
-                                                    .primaryColorDark)),
-                                      ]),
-                                ),
-                              );
-                            })),
-                  ),
+                  for (var fitnessReminder
+                      in allReminders.fitnessRemindersBasedOnDateTime)
+                    FitnessCard(
+                      height: height,
+                      width: width,
+                      fitnessReminder: fitnessReminder,
+                      selectedFreq: fitnessReminderDB.selectedFreq,
+                      fitnessType: fitnessReminderDB
+                          .fitnessType[fitnessReminderDB.selectedIndex],
+                      startDate: fitnessReminderDB.startDate.toString(),
+                    ),
                 ],
               ),
             ),
@@ -287,7 +223,7 @@ class AllRemindersScreen extends StatelessWidget {
                     visible:
                         allReminders.medicationReminderBasedOnDateTime.isEmpty,
                     child: Container(
-                      child: Text('No Medication Reminder Set for this Date'),
+                      child: Text('No medication reminder set for this date'),
                     ),
                   ),
                   for (var medicationReminder
@@ -325,7 +261,7 @@ class AllRemindersScreen extends StatelessWidget {
                       visible:
                           allReminders.waterRemindersBasedOnDateTime.isEmpty,
                       child: Container(
-                        child: Text('No Water Reminder Set for this Date'),
+                        child: Text('No water reminder set for this date'),
                       )),
                   for (var waterReminder
                       in allReminders.waterRemindersBasedOnDateTime)
@@ -355,7 +291,7 @@ class AllRemindersScreen extends StatelessWidget {
                   Visibility(
                       visible: allReminders.appointmentsBasedOnDateTime.isEmpty,
                       child: Container(
-                        child: Text('No Appointment Set for this Date'),
+                        child: Text('No appointment set for this date'),
                       )),
                   for (var appointment
                       in allReminders.appointmentsBasedOnDateTime)
@@ -384,9 +320,10 @@ class AllRemindersScreen extends StatelessWidget {
                   ),
                   SizedBox(height: height * 0.02),
                   Visibility(
-                      visible: allReminders.appointmentsBasedOnDateTime.isEmpty,
+                      visible:
+                          allReminders.dietRemindersBasedOnDateTime.isEmpty,
                       child: Container(
-                        child: Text('No Diet plan Set for this Date'),
+                        child: Text('No diet plan set for this date'),
                       )),
                   for (var diet in allReminders.dietRemindersBasedOnDateTime)
                     DietCard(

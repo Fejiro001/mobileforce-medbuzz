@@ -59,7 +59,7 @@ class AppointmentData extends ChangeNotifier {
 
   setSelectedNote(String note) => appointmentNote = note;
 
-  void deleteAppointment(key) async {
+  Future<void> deleteAppointment(key) async {
     var box = await Hive.openBox<Appointment>(_boxName);
 
     _appointment = box.values.toList();
@@ -77,7 +77,7 @@ class AppointmentData extends ChangeNotifier {
 
     _appointment = box.values.toList();
 
-    _activeAppointment = box.get(appointmentKey);
+// _activeAppointment = box.get(appointmentKey);
 
     notifyListeners();
   }
@@ -88,6 +88,16 @@ class AppointmentData extends ChangeNotifier {
     _activeAppointment = box.get(key);
 
     notifyListeners();
+  }
+
+  void deleteAppointmentReminders() async {
+    try {
+      var box = await Hive.openBox<Appointment>(_boxName);
+      box.deleteFromDisk();
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
   }
 
   Appointment getActiveAppointment() {

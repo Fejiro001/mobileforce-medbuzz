@@ -8,7 +8,8 @@ part of 'diet_reminder.dart';
 
 class DietModelAdapter extends TypeAdapter<DietModel> {
   @override
-  int get typeId => 1;
+  // TODO: implement typeId
+  int get typeId => 2;
   @override
   DietModel read(BinaryReader reader) {
     var numOfFields = reader.readByte();
@@ -20,7 +21,12 @@ class DietModelAdapter extends TypeAdapter<DietModel> {
       time: (fields[1] as List)?.cast<int>(),
       startDate: fields[2] as DateTime,
       secondDietName: fields[3] as String,
+      isDone: fields[11] as bool,
+      isSkipped: fields[12] as bool,
       thirdDietName: fields[4] as String,
+      frequency: fields[13] as String,
+      activityTime: (fields[14] as List)?.cast<int>(),
+      minsperday: fields[15] as int,
       secondTime: (fields[5] as List)?.cast<int>(),
       thirdTime: (fields[6] as List)?.cast<int>(),
       endDate: fields[7] as DateTime,
@@ -33,7 +39,7 @@ class DietModelAdapter extends TypeAdapter<DietModel> {
   @override
   void write(BinaryWriter writer, DietModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.dietName)
       ..writeByte(1)
@@ -55,6 +61,16 @@ class DietModelAdapter extends TypeAdapter<DietModel> {
       ..writeByte(9)
       ..write(obj.description)
       ..writeByte(10)
-      ..write(obj.foodClasses);
+      ..write(obj.foodClasses)
+      ..writeByte(11)
+      ..write(obj.isDone)
+      ..writeByte(12)
+      ..write(obj.isSkipped)
+      ..writeByte(13)
+      ..write(obj.frequency)
+      ..writeByte(14)
+      ..write(obj.activityTime)
+      ..writeByte(15)
+      ..write(obj.minsperday);
   }
 }

@@ -8,7 +8,8 @@ part of 'medication_reminder.dart';
 
 class MedicationReminderAdapter extends TypeAdapter<MedicationReminder> {
   @override
-  int get typeId => 3;
+  // TODO: implement typeId
+  int get typeId => 5;
   @override
   MedicationReminder read(BinaryReader reader) {
     var numOfFields = reader.readByte();
@@ -25,6 +26,8 @@ class MedicationReminderAdapter extends TypeAdapter<MedicationReminder> {
       dosage: fields[6] as int,
       startAt: fields[7] as DateTime,
       endAt: fields[8] as DateTime,
+      isDone: fields[12] as bool,
+      isSkipped: fields[13] as bool,
       index: fields[9] as String,
       id: fields[10] as String,
       description: fields[11] as String,
@@ -34,7 +37,7 @@ class MedicationReminderAdapter extends TypeAdapter<MedicationReminder> {
   @override
   void write(BinaryWriter writer, MedicationReminder obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.drugName)
       ..writeByte(1)
@@ -58,6 +61,10 @@ class MedicationReminderAdapter extends TypeAdapter<MedicationReminder> {
       ..writeByte(10)
       ..write(obj.id)
       ..writeByte(11)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(12)
+      ..write(obj.isDone)
+      ..writeByte(13)
+      ..write(obj.isSkipped);
   }
 }

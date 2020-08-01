@@ -1,4 +1,7 @@
 import 'package:MedBuzz/core/constants/route_names.dart';
+
+import 'package:MedBuzz/ui/views/schedule-appointment/schedule_appointment_reminder_screen.dart';
+
 import 'package:MedBuzz/ui/views/schedule-appointment/schedule_appointment_screen_model.dart';
 import 'package:MedBuzz/ui/widget/appointment_card.dart';
 import 'package:flutter/material.dart';
@@ -20,22 +23,44 @@ class ScheduledAppointmentsPage extends StatefulWidget {
 
 class _ScheduledAppointmentsPageState extends State<ScheduledAppointmentsPage> {
   @override
+  void initState() {
+    super.initState();
+    Provider.of<AppointmentData>(context, listen: false).getAppointments();
+    Provider.of<ScheduleAppointmentModel>(context, listen: false)
+        .updateAvailableAppointmentReminder(
+            Provider.of<AppointmentData>(context, listen: false).appointment);
+  }
+
+  @override
   Widget build(BuildContext context) {
     var appointmentReminders =
         Provider.of<ScheduleAppointmentModel>(context, listen: true);
 
-    var appointmentReminderDB =
-        Provider.of<AppointmentData>(context, listen: true);
-    appointmentReminderDB.getAppointments();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appointmentReminders.updateAvailableAppointmentReminder(
-          appointmentReminderDB.appointment);
-    });
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return DefaultTabController(
       length: 2,
       child: new Scaffold(
+        floatingActionButton: FloatingActionButton(
+            backgroundColor: Theme.of(context).primaryColor,
+            child: Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ScheduleAppointmentScreen(
+                          buttonText: 'Save',
+                        )),
+              );
+            })
+
+        /* IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(
+                  context, RouteNames.scheduleAppointmentScreen);
+            }) */
+        ,
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.color,
@@ -105,7 +130,12 @@ class _ScheduledAppointmentsPageState extends State<ScheduledAppointmentsPage> {
                           width: width,
                           height: height * .8,
                           child: Center(
-                              child: Text('No Appointments for this date')),
+                              child: Text(
+                            'No upcoming appointments',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: Config.textSize(context, 5.55)),
+                          )),
                         )),
                     for (var appointment
                         in appointmentReminders.upcomingApointments)
@@ -130,19 +160,27 @@ class _ScheduledAppointmentsPageState extends State<ScheduledAppointmentsPage> {
                         child: Container(
                           width: width,
                           height: height * .8,
-                          child: Center(child: Text('No Past Appointments')),
+                          child: Center(
+                              child: Text(
+                            'No past Appointments',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: Config.textSize(context, 5.55)),
+                          )),
                         )),
                     for (var appointment
                         in appointmentReminders.pastApointments)
-                      for (var appointment
-                          in appointmentReminders.allAppointments)
 //                        if (DateTime.now()
 //                            .isAfter(appointmentReminders.selectedDateTime))
-                        AppointmentCard(
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: Config.xMargin(context, 5.0)),
+                        child: AppointmentCard(
                           height: height,
                           width: width,
                           appointment: appointment,
-                        )
+                        ),
+                      )
                   ],
                 ),
               ),

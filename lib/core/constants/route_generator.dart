@@ -3,6 +3,8 @@ import 'package:MedBuzz/ui/navigation/page_transition/page_transition.dart';
 import 'package:MedBuzz/ui/views/Home.dart';
 import 'package:MedBuzz/ui/views/add_medication/add_medication_screen.dart';
 import 'package:MedBuzz/ui/views/all_reminders/all_reminders_screen.dart';
+import 'package:MedBuzz/ui/views/badge/badge_screen.dart';
+import 'package:MedBuzz/ui/views/badge/congrats_screen.dart';
 import 'package:MedBuzz/ui/views/diet_reminders/all_diet_reminders.dart';
 import 'package:MedBuzz/ui/views/diet_reminders/schedule_diet_reminder.dart';
 import 'package:MedBuzz/ui/views/drug_description/drug_description.dart';
@@ -13,14 +15,19 @@ import 'package:MedBuzz/ui/views/health_tips/health_tips_screen.dart';
 import 'package:MedBuzz/ui/views/home_screen/home_page.dart';
 import 'package:MedBuzz/ui/views/login_page/login_page_screen.dart';
 import 'package:MedBuzz/ui/views/medication_reminders/all_medications_reminder_screen.dart';
+import 'package:MedBuzz/ui/views/medication_reminders/all_sheduled_medication_reminder_screen.dart';
+import 'package:MedBuzz/ui/views/medication_reminders/medication_history.dart';
 import 'package:MedBuzz/ui/views/medication_reminders/medication_reminder_view.dart';
+import 'package:MedBuzz/ui/views/notification_tone/notification_tone_screen.dart';
 import 'package:MedBuzz/ui/views/onboarding.dart';
-import 'package:MedBuzz/ui/views/password_recovery/forgot_password_mail.dart';
+import 'package:MedBuzz/ui/views/password_recovery/authentication_failed_screen.dart';
 import 'package:MedBuzz/ui/views/password_recovery/forgot_password_reset.dart';
 import 'package:MedBuzz/ui/views/password_recovery/forgot_password_submit.dart';
+import 'package:MedBuzz/ui/views/reminder_description_card/new_all_reminders_screen.dart';
 import 'package:MedBuzz/ui/views/schedule-appointment/all_scheduled_appointment_reminders.dart';
 import 'package:MedBuzz/ui/views/schedule-appointment/schedule_appointment_reminder_screen.dart';
-import 'package:MedBuzz/ui/views/schedule-appointment/single_appointment_screen.dart';
+import 'package:MedBuzz/ui/views/badge/badges.dart';
+
 import 'package:MedBuzz/ui/views/schedule-appointment/view_appointment_screen.dart';
 import 'package:MedBuzz/ui/views/signup_page/signup_screen.dart';
 import 'package:MedBuzz/ui/views/single_diet_screen/single_diet_screen.dart';
@@ -92,8 +99,8 @@ class RouteGenerator {
       case RouteNames.forgotPasswordReset:
         return CustomSlideTransition(child: ForgotPasswordReset());
         break;
-      case RouteNames.forgotPasswordMail:
-        return CustomSlideTransition(child: ForgotPasswordMail());
+      case RouteNames.authenticationFailed:
+        return CustomSlideTransition(child: AuthenticationFailed());
         break;
       case RouteNames.singleDietScreen:
         return CustomSlideTransition(child: SingleDiet());
@@ -113,8 +120,14 @@ class RouteGenerator {
       case RouteNames.addMedicationScreen:
         return CustomSlideTransition(child: AddMedicationScreen());
         break;
+      case RouteNames.medicationHistoryPage:
+        return CustomSlideTransition(child: MedicationHistoryPage());
+        break;
       case RouteNames.medicationScreen:
         return CustomSlideTransition(child: MedicationScreen());
+        break;
+      case RouteNames.medicationPage:
+        return CustomSlideTransition(child: SchedulledMedicationScreen());
         break;
       case RouteNames.dietScheduleScreen:
         return CustomSlideTransition(child: DietScheduleScreen());
@@ -125,9 +138,21 @@ class RouteGenerator {
       case RouteNames.healthTips:
         return CustomSlideTransition(child: HealthTips());
         break;
-      case RouteNames.singleAppointment:
-        return CustomSlideTransition(child: SingleAppointment());
+      case RouteNames.newAllReminderScreen:
+        return CustomSlideTransition(child: NewAllReminderScreen());
         break;
+      case RouteNames.badgesScreen:
+        return CustomSlideTransition(child: BadgesScreen());
+      case RouteNames.badgeCollection:
+        return CustomSlideTransition(child: Badges());
+        break;
+      case RouteNames.notificationToneScreen:
+        return CustomSlideTransition(child: NotificationToneScreen());
+        break;
+      case RouteNames.congratsScreen:
+        return CustomSlideTransition(child: CongratsScreen());
+        break;
+
       // case RouteNames.deleteDialog:
       //   return CustomSlideTransition(child: DeleteDialog());
       //   break;
